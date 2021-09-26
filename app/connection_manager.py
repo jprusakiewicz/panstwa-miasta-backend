@@ -35,11 +35,10 @@ class ConnectionManager:
             await room.end_game()
 
     async def connect(self, websocket: WebSocket, room_id: str, client_id: str, nick: str):
-        self.validate_client_id(room_id, client_id)
+        self.validate_client_id_availability(room_id, client_id)
         await websocket.accept()
         connection = Connection(ws=websocket, player=Player(player_id=client_id, nick=nick, is_playing=False))
         await self.append_connection(room_id, connection)
-        await self.broadcast(room_id)
 
     async def append_connection(self, room_id, connection):
         room = self.get_room(room_id)
@@ -60,25 +59,17 @@ class ConnectionManager:
     async def kick_player(self, room_id, player_id):
         room = self.get_room(room_id)
         await room.kick_player(player_id)
-        await self.broadcast(room_id)
 
     async def handle_ws_message(self, message, room_id, client_id):
         try:
-            print(message)
             players_move = json.loads(message["text"])
             room = self.get_room(room_id)
-            await room.handle_players_move(client_id, players_move)
+            room.handle_players_move(client_id, players_move)
         except KeyError:
             print("handle message")
             pass
         except ItsNotYourTurn as e:
-            # send message to this player
             print(e)
-        # except YouDontHaveThisCardOnYourHand as e:
-        #     ...
-        # except YouCantMakeThisMove as e:
-        #     ...
-        await self.broadcast(room_id)
 
     def get_active_connection(self, websocket: WebSocket):
         for r in self.rooms:
@@ -86,7 +77,7 @@ class ConnectionManager:
                 if connection.ws == websocket:
                     return connection, r
 
-    def validate_client_id(self, room_id: str, client_id: str):
+    def validate_client_id_availability(self, room_id: str, client_id: str):
         room = self.get_room(room_id)
         if client_id in [connection.player.id for connection in room.active_connections]:
             raise PlayerIdAlreadyInUse
@@ -108,4 +99,3 @@ class ConnectionManager:
     async def delete_room(self, room_id):
         room = self.get_room(room_id)
         self.rooms.remove(room)
-

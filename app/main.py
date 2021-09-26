@@ -171,33 +171,9 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
         logging.info("disconnected!")
 
 
-#
 # @app.websocket("/test/{room_id}/{client_id}")
 # async def websocket_endpoint(websocket: WebSocket):
-#     json_to_send = {"is_game_on": True,
-#                     "whos_turn": "Red",
-#                     "nicks": {"Red": "Zbyszek",
-#                               "Green": "Marcin",
-#                               "Blue": "Michał",
-#                               "Yellow": "Łukasz"},
-#                     "dice": 1,
-#                     "game_data": {
-#                         "regular": {
-#                             "Red": [1, 4, 7],
-#                             "Green": [1, 4, 9],
-#                             "Blue": [1],
-#                             "Yellow": [1]},
-#                         "finnish": {
-#                             "Red": [],
-#                             "Green": [1],
-#                             "Blue": [1, 2],
-#                             "Yellow": [1, 4]},
-#                         "idle": {
-#                             "Red": 4,
-#                             "Green": 4,
-#                             "Blue": 4,
-#                             "Yellow": 4}
-#                     }}
+#     json_to_send = {}
 #     try:
 #         while True:
 #             ws = websocket
@@ -205,7 +181,6 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
 #
 #             await websocket.send_json(json_to_send)
 #             message = await websocket.receive()
-#
 #
 #     except WebSocketDisconnect:
 #         logging.info("disconnected")
