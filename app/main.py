@@ -33,7 +33,7 @@ async def get_stats(room_id: Optional[str] = None):
 
 
 @app.post("/room/new/{room_id}")
-async def end_game(room_id: str):
+async def new_room(room_id: str):
     number_players: int = 4
     try:
         await manager.create_new_room(room_id)
@@ -50,7 +50,7 @@ async def end_game(room_id: str):
 
 
 @app.post("/room/new/{room_id}/{number_players}")
-async def end_game(room_id: str, number_players: int):
+async def new_room(room_id: str, number_players: int):
     try:
         await manager.create_new_room(room_id)
         return JSONResponse(
