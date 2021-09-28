@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timedelta
 from typing import Optional
 
 import uvicorn
@@ -171,19 +172,109 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
         logging.info("disconnected!")
 
 
-# @app.websocket("/test/{room_id}/{client_id}")
-# async def websocket_endpoint(websocket: WebSocket):
-#     json_to_send = {}
-#     try:
-#         while True:
-#             ws = websocket
-#             await ws.accept()
-#
-#             await websocket.send_json(json_to_send)
-#             message = await websocket.receive()
-#
-#     except WebSocketDisconnect:
-#         logging.info("disconnected")
+@app.websocket("/test/{room_id}/{client_id}/{nick}")
+async def websocket_endpoint(websocket: WebSocket):
+    timestamp = datetime.now() + timedelta(0, 15)
+    json_to_send = {'game_state': "COMPLETING",
+                    'game_data': {'categories': ['first', 'second', 'third'], 'letter': 'a'},
+                    "timestamp": timestamp.isoformat()}
+    # json_to_send = {'game_state': "VOTING",
+    #                 'game_data': {'candidates': {'first': ['aaa', 'bbb', 'ccc'], 'second': ['ddd', 'eee', 'fff'],
+    #                                              'third': ['ggg', 'hhh', 'iii']}},
+    #                 "timestamp": timestamp.isoformat()}
+    json_to_send = {'game_state': "SCORE_DISPLAY",
+                    'game_data': {
+                        'results': {'player1': {'score': 25, 'results': [{'category_name': "Panstwa",
+                                                                               'score': 5,
+                                                                               'word': "aaa"},
+                                                                              {'category_name': "Miasta",
+                                                                               'score': 10,
+                                                                               'word': "bbb"},
+                                                                              {'category_name': "Rzeczy",
+                                                                               'score': 15,
+                                                                               'word': "ccc"},
+                                                                              {'category_name': "Imiona",
+                                                                               'score': 10,
+                                                                               'word': "ddd"},
+                                                                              {'category_name': "Zwierzeta",
+                                                                               'score': 15,
+                                                                               'word': "eee"},
+                                                                              {'category_name': "Rzeki",
+                                                                               'score': 0,
+                                                                               'word': "fff"}]},
+                                    'player2': {'score': 10, 'results': [{'category_name': "Panstwa",
+                                                                               'score': 5,
+                                                                               'word': "aa"},
+                                                                              {'category_name': "Miasta",
+                                                                               'score': 10,
+                                                                               'word': "bb"},
+                                                                              {'category_name': "Rzeczy",
+                                                                               'score': 15,
+                                                                               'word': "cc"},
+                                                                              {'category_name': "Imiona",
+                                                                               'score': 10,
+                                                                               'word': "dd"},
+                                                                              {'category_name': "Zwierzeta",
+                                                                               'score': 15,
+                                                                               'word': "ee"},
+                                                                              {'category_name': "Rzeki",
+                                                                               'score': 0,
+                                                                               'word': "ff"}]
+                                                      },
+                                    'player3': {'score': 10, 'results': [{'category_name': "Panstwa",
+                                                                               'score': 5,
+                                                                               'word': "aa"},
+                                                                              {'category_name': "Miasta",
+                                                                               'score': 10,
+                                                                               'word': "bb"},
+                                                                              {'category_name': "Rzeczy",
+                                                                               'score': 15,
+                                                                               'word': "cc"},
+                                                                              {'category_name': "Imiona",
+                                                                               'score': 10,
+                                                                               'word': "dd"},
+                                                                              {'category_name': "Zwierzeta",
+                                                                               'score': 15,
+                                                                               'word': "ee"},
+                                                                              {'category_name': "Rzeki",
+                                                                               'score': 0,
+                                                                               'word': "ff"}]
+                                                      },
+                                    'player4': {'score': 10, 'results': [{'category_name': "Panstwa",
+                                                                               'score': 5,
+                                                                               'word': "aa"},
+                                                                              {'category_name': "Miasta",
+                                                                               'score': 10,
+                                                                               'word': "bb"},
+                                                                              {'category_name': "Rzeczy",
+                                                                               'score': 15,
+                                                                               'word': "cc"},
+                                                                              {'category_name': "Imiona",
+                                                                               'score': 10,
+                                                                               'word': "dd"},
+                                                                              {'category_name': "Zwierzeta",
+                                                                               'score': 15,
+                                                                               'word': "ee"},
+                                                                              {'category_name': "Rzeki",
+                                                                               'score': 0,
+                                                                               'word': "ff"}]
+                                                      },
+
+
+                                    }},
+                    "timestamp": timestamp.isoformat()}
+
+    try:
+        while True:
+            ws = websocket
+            await ws.accept()
+
+            await websocket.send_json(json_to_send)
+            message = await websocket.receive()
+            print(message)
+
+    except WebSocketDisconnect:
+        logging.info("disconnected")
 
 
 if __name__ == "__main__":
