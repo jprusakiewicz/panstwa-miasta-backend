@@ -121,7 +121,7 @@ class Game:
         if self.game_state is GameState.lobby:
             pass
         elif self.game_state is GameState.completing:
-            game_state["categories"] = self.categories.get_categories_names() # todo do it once!
+            game_state["categories"] = self.categories.get_categories_names()  # todo do it once!
             game_state["letter"] = self.letter
         elif self.game_state is GameState.voting:
             game_state["candidates"] = self.get_voting_candidates()  # todo do it once!
@@ -146,7 +146,7 @@ class Game:
 
     def setup_categories(self, custom_categories=None) -> Categories:
         if custom_categories is None:
-            custom_categories = ["one", "two", "three"]
+            custom_categories = ["Panstwa", "Miasta", "Rzeczy", "Zwierzeta", "Imie", "Rzecz"]
         categories = Categories()
         for category in custom_categories:
             c = Category(category)
@@ -170,11 +170,13 @@ class Game:
         return results
 
     def handle_complete(self, player_id, player_move):
+        print(len(self.categories.categories))
         for category in player_move:
             new_category = Category(category)
             new_category.word = player_move[category]
             new_category.player_id = player_id
             self.categories.append(new_category)
+        print(len(self.categories.categories))
 
     def handle_voting(self, player_id, first_player_voting):
         # todo check if player hasn't voted

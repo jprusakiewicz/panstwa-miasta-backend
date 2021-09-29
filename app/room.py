@@ -5,7 +5,7 @@ import random
 import threading
 import uuid
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List
 
 import requests
 
@@ -18,7 +18,7 @@ def get_timeout():
     try:
         timeout = float(os.path.join(os.getenv('TIMEOUT_SECONDS')))
     except TypeError:
-        timeout = 15  # if theres no env var
+        timeout = 20  # if theres no env var
     return timeout
 
 
@@ -92,25 +92,30 @@ class Room:
             await self.end_game()
 
     def handle_players_move(self, client_id, player_move):
-        if self.game.game_state is GameState.lobby or GameState.score_display:
+        print(player_move, " ", self.game.game_state)
+        if self.game.game_state is GameState.lobby or self.game.game_state is GameState.score_display:
             pass  # do nothing
         elif self.game.game_state is GameState.completing:
             self.game.handle_complete(client_id, player_move)
         elif self.game.game_state is GameState.voting:
             self.game.votes[client_id] = player_move["votes"]
 
+    def get_timestamp(self, delta=2):
+        t = self.timestamp - timedelta(0, delta)
+        return t.isoformat()
+
     def get_game_state(self, client_id) -> str:
         if self.game.game_state is GameState.lobby:
             game_state = dict(game_state=self.game.game_state.value)
         elif self.game.game_state is GameState.completing:
             game_state = dict(game_state=self.game.game_state.value, nicks=self.get_enemies_nicks(client_id),
-                              timestamp=self.timestamp.isoformat(), game_data=self.game.get_current_state())
+                              timestamp=self.get_timestamp(), game_data=self.game.get_current_state())
         elif self.game.game_state is GameState.voting:
             game_state = dict(game_state=self.game.game_state.value, nicks=self.get_enemies_nicks(client_id),
-                              timestamp=self.timestamp.isoformat(), game_data=self.game.get_current_state())
+                              timestamp=self.get_timestamp(), game_data=self.game.get_current_state())
         elif self.game.game_state is GameState.score_display:
             game_state = dict(game_state=self.game.game_state.value, nicks=self.get_enemies_nicks(client_id),
-                              timestamp=self.timestamp.isoformat(), game_data=self.game.get_current_state())
+                              timestamp=self.get_timestamp(), game_data=self.game.get_current_state())
         else:
             raise ValueError
         return json.dumps(game_state)

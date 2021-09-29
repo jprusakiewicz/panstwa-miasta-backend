@@ -176,12 +176,12 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
 async def websocket_endpoint(websocket: WebSocket):
     timestamp = datetime.now() + timedelta(0, 15)
     json_to_send = {'game_state': "COMPLETING",
-                    'game_data': {'categories': ['first', 'second', 'third'], 'letter': 'a'},
+                    'game_data': {'categories': ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'], 'letter': 'a'},
                     "timestamp": timestamp.isoformat()}
-    # json_to_send = {'game_state': "VOTING",
-    #                 'game_data': {'candidates': {'first': ['aaa', 'bbb', 'ccc'], 'second': ['ddd', 'eee', 'fff'],
-    #                                              'third': ['ggg', 'hhh', 'iii']}},
-    #                 "timestamp": timestamp.isoformat()}
+    json_to_send = {'game_state': "VOTING",
+                    'game_data': {'candidates': {'first': ['aaa', 'bbb', 'ccc'], 'second': ['ddd', 'eee', 'fff'],
+                                                 'third': ['ggg', 'hhh', 'iii']}},
+                    "timestamp": timestamp.isoformat()}
     json_to_send = {'game_state': "SCORE_DISPLAY",
                     'game_data': {
                         'results': {'player1': {'score': 25, 'results': [{'category_name': "Panstwa",
