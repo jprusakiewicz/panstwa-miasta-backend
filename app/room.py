@@ -61,6 +61,7 @@ class Room:
         self.export_room_status()
         if len(self.get_players_in_game_ids()) <= 1:
             await self.end_game()
+            await self.broadcast_json()
 
     async def broadcast_json(self):
         for connection in self.active_connections:
