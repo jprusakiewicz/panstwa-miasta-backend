@@ -25,7 +25,6 @@ def get_timeout():
 class Room:
     def __init__(self, room_id: str, max_players: int = 8):
         self.full_results = []
-        self.short_results = None
         self.id = room_id
         self.active_connections: List[Connection] = []
         self.game: Game = Game()
@@ -149,9 +148,10 @@ class Room:
         self.export_room_status()
 
     def export_score(self):
+        short_results = self.count_short_results()
         try:
             result = requests.post(url=os.getenv('EXPORT_RESULTS_URL'),
-                                   json=dict(roomId=self.id, results=self.short_results))
+                                   json=dict(roomId=self.id, results=short_results))
             if result.status_code == 200:
                 print("export succesfull")
             else:
@@ -159,6 +159,7 @@ class Room:
                 print(self.short_results)
         except (KeyError, requests.exceptions.MissingSchema):
             print("failed to get EXPORT_RESULT_URL env var")
+            print(short_results)
 
     def export_room_status(self):
         try:
@@ -171,6 +172,7 @@ class Room:
                 print("export failed: ", result.text, result.status_code)
         except TypeError as e:
             print("failed to get EXPORT_RESULTS_URL env var")
+            print("export failed players ids: ", self.get_players_in_game_ids())
 
     def restart_timer(self):
         self.timer.cancel()
@@ -193,3 +195,6 @@ class Room:
             await self.broadcast_json()
         elif self.game.game_state is GameState.score_display:
             await self.restart_or_end_game()
+
+    def count_short_results(self):
+        return self.game.get_short_results()

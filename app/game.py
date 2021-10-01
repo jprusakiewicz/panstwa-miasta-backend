@@ -220,3 +220,10 @@ class Game:
                                 category.legit_score += 1
                             if voting is False:
                                 category.legit_score -= 1
+
+    def get_short_results(self):
+        player_oriented_categories = self.categories.get_player_oriented_categories()
+        results = {}
+        for player in player_oriented_categories:
+            results[player] = count_overall_score(player_oriented_categories[player])
+        return results
