@@ -157,7 +157,7 @@ class Room:
                 print("export succesfull")
             else:
                 print("export failed: ", result.text, result.status_code)
-                print(self.short_results)
+                print(short_results)
         except (KeyError, requests.exceptions.MissingSchema):
             print("failed to get EXPORT_RESULT_URL env var")
             print(short_results)
