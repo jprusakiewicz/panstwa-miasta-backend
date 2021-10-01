@@ -137,18 +137,24 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
             while True:
                 message = await websocket.receive()
                 logging.info(message)
-                await manager.handle_ws_message(message, room_id, client_id)
+                try:
+                    if message['code'] == 1001:
+                        print(1001)
+                        await manager.disconnect(websocket)
+                except KeyError:
+                    await manager.handle_ws_message(message, room_id, client_id)
+                else:
+                    await manager.handle_ws_message(message, room_id, client_id)
 
         except RuntimeError as e:
             logging.info(e.__class__.__name__)
             logging.info(e)
 
-        except Exception as e:
-            logging.info(e)
-            logging.info(e.__class__.__name__)
-            logging.info("disconnected")
-            await manager.disconnect(websocket)
-            await manager.broadcast(room_id)
+        # except Exception as e:
+        #     logging.info(e)
+        #     logging.info(e.__class__.__name__)
+        #     logging.info("disconnected")
+        #     await manager.disconnect(websocket)
 
     except GameIsStarted:
         logging.info(f"Theres already game started")
@@ -165,11 +171,10 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
     except ConnectionClosedOK:
         await manager.kick_player(room_id, client_id)
         logging.info(f"ConnectionClosedOK {client_id}")
-        await manager.broadcast(room_id)
-
-    except Exception as e:
-        logging.info(e)
-        logging.info("disconnected!")
+    #
+    # except Exception as e:
+    #     logging.info(e)
+    #     logging.info("disconnected!")
 
 
 @app.websocket("/test/{room_id}/{client_id}/{nick}")
@@ -178,91 +183,91 @@ async def websocket_endpoint(websocket: WebSocket):
     json_to_send = {'game_state': "COMPLETING",
                     'game_data': {'categories': ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'], 'letter': 'a'},
                     "timestamp": timestamp.isoformat()}
-    json_to_send = {'game_state': "VOTING",
-                    'game_data': {'candidates': {'first': ['aaa', 'bbb', 'ccc'], 'second': ['ddd', 'eee', 'fff'],
-                                                 'third': ['ggg', 'hhh', 'iii']}},
-                    "timestamp": timestamp.isoformat()}
-    json_to_send = {'game_state': "SCORE_DISPLAY",
-                    'game_data': {
-                        'results': {'player1': {'score': 25, 'results': [{'category_name': "Panstwa",
-                                                                               'score': 5,
-                                                                               'word': "aaa"},
-                                                                              {'category_name': "Miasta",
-                                                                               'score': 10,
-                                                                               'word': "bbb"},
-                                                                              {'category_name': "Rzeczy",
-                                                                               'score': 15,
-                                                                               'word': "ccc"},
-                                                                              {'category_name': "Imiona",
-                                                                               'score': 10,
-                                                                               'word': "ddd"},
-                                                                              {'category_name': "Zwierzeta",
-                                                                               'score': 15,
-                                                                               'word': "eee"},
-                                                                              {'category_name': "Rzeki",
-                                                                               'score': 0,
-                                                                               'word': "fff"}]},
-                                    'player2': {'score': 10, 'results': [{'category_name': "Panstwa",
-                                                                               'score': 5,
-                                                                               'word': "aa"},
-                                                                              {'category_name': "Miasta",
-                                                                               'score': 10,
-                                                                               'word': "bb"},
-                                                                              {'category_name': "Rzeczy",
-                                                                               'score': 15,
-                                                                               'word': "cc"},
-                                                                              {'category_name': "Imiona",
-                                                                               'score': 10,
-                                                                               'word': "dd"},
-                                                                              {'category_name': "Zwierzeta",
-                                                                               'score': 15,
-                                                                               'word': "ee"},
-                                                                              {'category_name': "Rzeki",
-                                                                               'score': 0,
-                                                                               'word': "ff"}]
-                                                      },
-                                    'player3': {'score': 10, 'results': [{'category_name': "Panstwa",
-                                                                               'score': 5,
-                                                                               'word': "aa"},
-                                                                              {'category_name': "Miasta",
-                                                                               'score': 10,
-                                                                               'word': "bb"},
-                                                                              {'category_name': "Rzeczy",
-                                                                               'score': 15,
-                                                                               'word': "cc"},
-                                                                              {'category_name': "Imiona",
-                                                                               'score': 10,
-                                                                               'word': "dd"},
-                                                                              {'category_name': "Zwierzeta",
-                                                                               'score': 15,
-                                                                               'word': "ee"},
-                                                                              {'category_name': "Rzeki",
-                                                                               'score': 0,
-                                                                               'word': "ff"}]
-                                                      },
-                                    'player4': {'score': 10, 'results': [{'category_name': "Panstwa",
-                                                                               'score': 5,
-                                                                               'word': "aa"},
-                                                                              {'category_name': "Miasta",
-                                                                               'score': 10,
-                                                                               'word': "bb"},
-                                                                              {'category_name': "Rzeczy",
-                                                                               'score': 15,
-                                                                               'word': "cc"},
-                                                                              {'category_name': "Imiona",
-                                                                               'score': 10,
-                                                                               'word': "dd"},
-                                                                              {'category_name': "Zwierzeta",
-                                                                               'score': 15,
-                                                                               'word': "ee"},
-                                                                              {'category_name': "Rzeki",
-                                                                               'score': 0,
-                                                                               'word': "ff"}]
-                                                      },
-
-
-                                    }},
-                    "timestamp": timestamp.isoformat()}
+    # json_to_send = {'game_state': "VOTING",
+    #                 'game_data': {'candidates': {'first': ['aaa', 'bbb', 'ccc'], 'second': ['ddd', 'eee', 'fff'],
+    #                                              'third': ['ggg', 'hhh', 'iii']}},
+    #                 "timestamp": timestamp.isoformat()}
+    # json_to_send = {'game_state': "SCORE_DISPLAY",
+    #                 'game_data': {
+    #                     'results': {'player1': {'score': 25, 'results': [{'category_name': "Panstwa",
+    #                                                                            'score': 5,
+    #                                                                            'word': "aaa"},
+    #                                                                           {'category_name': "Miasta",
+    #                                                                            'score': 10,
+    #                                                                            'word': "bbb"},
+    #                                                                           {'category_name': "Rzeczy",
+    #                                                                            'score': 15,
+    #                                                                            'word': "ccc"},
+    #                                                                           {'category_name': "Imiona",
+    #                                                                            'score': 10,
+    #                                                                            'word': "ddd"},
+    #                                                                           {'category_name': "Zwierzeta",
+    #                                                                            'score': 15,
+    #                                                                            'word': "eee"},
+    #                                                                           {'category_name': "Rzeki",
+    #                                                                            'score': 0,
+    #                                                                            'word': "fff"}]},
+    #                                 'player2': {'score': 10, 'results': [{'category_name': "Panstwa",
+    #                                                                            'score': 5,
+    #                                                                            'word': "aa"},
+    #                                                                           {'category_name': "Miasta",
+    #                                                                            'score': 10,
+    #                                                                            'word': "bb"},
+    #                                                                           {'category_name': "Rzeczy",
+    #                                                                            'score': 15,
+    #                                                                            'word': "cc"},
+    #                                                                           {'category_name': "Imiona",
+    #                                                                            'score': 10,
+    #                                                                            'word': "dd"},
+    #                                                                           {'category_name': "Zwierzeta",
+    #                                                                            'score': 15,
+    #                                                                            'word': "ee"},
+    #                                                                           {'category_name': "Rzeki",
+    #                                                                            'score': 0,
+    #                                                                            'word': "ff"}]
+    #                                                   },
+    #                                 'player3': {'score': 10, 'results': [{'category_name': "Panstwa",
+    #                                                                            'score': 5,
+    #                                                                            'word': "aa"},
+    #                                                                           {'category_name': "Miasta",
+    #                                                                            'score': 10,
+    #                                                                            'word': "bb"},
+    #                                                                           {'category_name': "Rzeczy",
+    #                                                                            'score': 15,
+    #                                                                            'word': "cc"},
+    #                                                                           {'category_name': "Imiona",
+    #                                                                            'score': 10,
+    #                                                                            'word': "dd"},
+    #                                                                           {'category_name': "Zwierzeta",
+    #                                                                            'score': 15,
+    #                                                                            'word': "ee"},
+    #                                                                           {'category_name': "Rzeki",
+    #                                                                            'score': 0,
+    #                                                                            'word': "ff"}]
+    #                                                   },
+    #                                 'player4': {'score': 10, 'results': [{'category_name': "Panstwa",
+    #                                                                            'score': 5,
+    #                                                                            'word': "aa"},
+    #                                                                           {'category_name': "Miasta",
+    #                                                                            'score': 10,
+    #                                                                            'word': "bb"},
+    #                                                                           {'category_name': "Rzeczy",
+    #                                                                            'score': 15,
+    #                                                                            'word': "cc"},
+    #                                                      w                     {'category_name': "Imiona",
+    #                                                                            'score': 10,
+    #                                                                            'word': "dd"},
+    #                                                                           {'category_name': "Zwierzeta",
+    #                                                                            'score': 15,
+    #                                                                            'word': "ee"},
+    #                                                                           {'category_name': "Rzeki",
+    #                                                                            'score': 0,
+    #                                                                            'word': "ff"}]
+    #                                                   },
+    #
+    #
+    #                                 }},
+    #                 "timestamp": timestamp.isoformat()}
 
     try:
         while True:

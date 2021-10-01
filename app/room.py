@@ -98,7 +98,7 @@ class Room:
         elif self.game.game_state is GameState.completing:
             self.game.handle_complete(client_id, player_move)
         elif self.game.game_state is GameState.voting:
-            self.game.votes[client_id] = player_move["votes"]
+            self.game.votes[client_id] = player_move
 
     def get_timestamp(self, delta=2):
         t = self.timestamp - timedelta(0, delta)
@@ -169,8 +169,7 @@ class Room:
                 print("export succesfull")
             else:
                 print("export failed: ", result.text, result.status_code)
-        except Exception as e:
-            print(e.__class__.__name__)
+        except TypeError as e:
             print("failed to get EXPORT_RESULTS_URL env var")
 
     def restart_timer(self):

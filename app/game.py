@@ -56,10 +56,16 @@ class Categories:
                 groups[category.player_id].append(category)
         return dict(groups)
 
-    def fill_is_legit(self):
+    def fill_is_legit(self, letter: str):
         for category in self.categories:
             if category.legit_score >= 0:
                 category.is_legit = True
+                try:
+                    first_letter = category.word[0]
+                except Exception as e:
+                    first_letter = ""
+                if first_letter != letter:
+                    category.is_legit = False
 
     def fill_is_unique(self):
         for category in self.categories:
@@ -69,13 +75,17 @@ class Categories:
 
     def fill_is_only_word_in_category(self):
         for category in self.categories:
-            if len([c for c in self.categories if
-                    c.category_name == category.category_name and c.player_id != category.player_id]) == 0:
+            other_legit = [c.is_legit for c in self.categories if
+                           c.category_name == category.category_name and c.player_id != category.player_id]
+            if not any(other_legit):
                 category.is_only_word_in_category = True
 
     def fill_scores(self):
         for category in self.categories:
-            if category.is_legit:
+            if category.word == "":
+                category.score = 0
+
+            elif category.is_legit:
                 if category.is_only_word_in_category is True:
                     category.score = 15
                 elif category.is_unique is True:
@@ -110,9 +120,10 @@ def count_overall_legit_score(categories) -> int:
 
 class Game:
     def __init__(self, custom_categories=None):
+        self.custom_categories = custom_categories
         self.game_state: GameState = GameState.lobby
         self.letter: str = draw_letter()
-        self.categories: Categories = self.setup_categories(custom_categories)
+        self.categories: Categories = self.setup_categories()
         self.responses: dict = {}
         self.votes: dict = {}
 
@@ -139,14 +150,17 @@ class Game:
 
     def summary_voting(self):
         self.categories.filter_empty()
-        self.categories.fill_is_legit()
-        self.categories.fill_is_only_word_in_category()
+        self.count_votes()
         self.categories.fill_is_unique()
+        self.categories.fill_is_legit(self.letter)
+        self.categories.fill_is_only_word_in_category()
         self.categories.fill_scores()
 
-    def setup_categories(self, custom_categories=None) -> Categories:
-        if custom_categories is None:
+    def setup_categories(self) -> Categories:
+        if self.custom_categories is None:
             custom_categories = ["Panstwa", "Miasta", "Rzeczy", "Zwierzeta", "Imie", "Rzecz"]
+        else:
+            custom_categories = self.custom_categories
         categories = Categories()
         for category in custom_categories:
             c = Category(category)
@@ -170,16 +184,20 @@ class Game:
         return results
 
     def handle_complete(self, player_id, player_move):
-        print(len(self.categories.categories))
         for category in player_move:
             new_category = Category(category)
-            new_category.word = player_move[category]
+            players_word: str = player_move[category].strip('\u200b').lower()
+            try:
+                new_category.word = players_word if players_word[0] == self.letter else ""
+            except IndexError:
+                new_category.word = ""
+            new_category.word = players_word
             new_category.player_id = player_id
             self.categories.append(new_category)
         print(len(self.categories.categories))
 
     def handle_voting(self, player_id, first_player_voting):
-        # todo check if player hasn't voted
+        # todo check if player hasn't voted (dont let voting twice)
         for category in first_player_voting:
             for word in first_player_voting[category]:
                 items = [c for c in self.categories.categories if
@@ -190,3 +208,15 @@ class Game:
                     elif first_player_voting[category][word] is False:
                         item.legit_score -= 1
         # todo player.has_voted = True
+
+    def count_votes(self):
+        for player in self.votes:
+            for p_category in self.votes[player]:
+                for word in self.votes[player][p_category]:
+                    voting = self.votes[player][p_category][word]
+                    for category in self.categories.categories:
+                        if category.word == word and category.category_name == p_category:
+                            if voting is True:
+                                category.legit_score += 1
+                            if voting is False:
+                                category.legit_score -= 1
