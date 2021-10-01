@@ -151,7 +151,7 @@ class Room:
     def export_score(self):
         short_results = self.count_short_results()
         try:
-            result = requests.post(url=os.getenv('EXPORT_RESULTS_URL'),
+            result = requests.post(url=os.path.join(os.getenv('EXPORT_RESULTS_URL'), "games/handle-results/panstwa-miasta"),
                                    json=dict(roomId=self.id, results=short_results))
             if result.status_code == 200:
                 print("export succesfull")
