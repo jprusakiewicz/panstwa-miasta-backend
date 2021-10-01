@@ -150,11 +150,11 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
             logging.info(e.__class__.__name__)
             logging.info(e)
 
-        # except Exception as e:
-        #     logging.info(e)
-        #     logging.info(e.__class__.__name__)
-        #     logging.info("disconnected")
-        #     await manager.disconnect(websocket)
+        except Exception as e:
+            logging.info(e)
+            logging.info(e.__class__.__name__)
+            logging.info("disconnected")
+            await manager.disconnect(websocket)
 
     except GameIsStarted:
         logging.info(f"Theres already game started")
