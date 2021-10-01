@@ -8,7 +8,9 @@ from app.game_state import GameState
 
 
 def draw_letter() -> str:
-    return random.choice(string.ascii_letters)
+    letters = string.ascii_lowercase
+    letters.replace("v", "").replace("x", "")
+    return random.choice(letters)
 
 
 class Categories:

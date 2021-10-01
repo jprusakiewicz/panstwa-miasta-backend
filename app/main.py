@@ -254,7 +254,7 @@ async def websocket_endpoint(websocket: WebSocket):
     #                                                                           {'category_name': "Rzeczy",
     #                                                                            'score': 15,
     #                                                                            'word': "cc"},
-    #                                                      w                     {'category_name': "Imiona",
+    #                                                                           {'category_name': "Imiona",
     #                                                                            'score': 10,
     #                                                                            'word': "dd"},
     #                                                                           {'category_name': "Zwierzeta",
