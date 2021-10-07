@@ -9,10 +9,11 @@ from app.game_state import GameState
 
 def draw_letter() -> str:
     letters = string.ascii_lowercase
-    letters.replace("v", "").replace("x", "")
+    letters.replace("v", "").replace("x", "").replace("q", "")
     return random.choice(letters)
 
-
+def count_overall_score(categories) -> int:
+    return sum([c.score for c in categories])
 class Categories:
     def __init__(self):
         self.categories: List[Category] = []
@@ -112,10 +113,6 @@ class Category:
         self.score: int = 0
 
 
-def count_overall_score(categories) -> int:
-    return sum([c.score for c in categories])
-
-
 def count_overall_legit_score(categories) -> int:
     return sum([c.legit_score for c in categories])
 
@@ -160,7 +157,7 @@ class Game:
 
     def setup_categories(self) -> Categories:
         if self.custom_categories is None:
-            custom_categories = ["Panstwa", "Miasta", "Rzeczy", "Zwierzeta", "Imie", "Rzecz"]
+            custom_categories = ["Panstwo", "Miasto", "Roślina", "Zwierzę", "Imię", "Rzecz"]
         else:
             custom_categories = self.custom_categories
         categories = Categories()
@@ -222,10 +219,3 @@ class Game:
                                 category.legit_score += 1
                             if voting is False:
                                 category.legit_score -= 1
-
-    def get_short_results(self):
-        player_oriented_categories = self.categories.get_player_oriented_categories()
-        results = {}
-        for player in player_oriented_categories:
-            results[player] = count_overall_score(player_oriented_categories[player])
-        return results

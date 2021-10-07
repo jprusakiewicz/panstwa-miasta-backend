@@ -10,16 +10,11 @@ from typing import List
 import requests
 
 from .connection import Connection
-from .game import Game
+from .game import Game, count_overall_score
 from .game_state import GameState
 
 
-def get_timeout():
-    try:
-        timeout = float(os.path.join(os.getenv('TIMEOUT_SECONDS')))
-    except TypeError:
-        timeout = 20  # if theres no env var
-    return timeout
+
 
 
 class Room:
@@ -30,7 +25,7 @@ class Room:
         self.game: Game = Game()
         self.number_of_players = max_players
         self.game_id: str
-        self.timeout = get_timeout()
+        self.timeout = 59
         self.timer = threading.Timer(self.timeout, self.handle_timeout)
 
     def handle_timeout(self):
@@ -59,6 +54,7 @@ class Room:
     async def remove_connection(self, connection_with_given_ws):
         self.active_connections.remove(connection_with_given_ws)
         self.export_room_status()
+        print(len(self.get_players_in_game_ids()))
         if len(self.get_players_in_game_ids()) <= 1:
             await self.end_game()
             await self.broadcast_json()
@@ -76,7 +72,7 @@ class Room:
         self.game = Game()
         self.game.game_state = GameState.completing
         self.game_id = str(uuid.uuid4().hex)
-        self.restart_timer()
+        self.restart_timer(self.timeout)
         await self.broadcast_json()
 
     async def end_game(self):
@@ -147,18 +143,21 @@ class Room:
     async def kick_player(self, player_id):  # probably have to leave this
         await self.remove_player_by_id(player_id)
         self.export_room_status()
+        # await self.restart_or_end_game()
+        # await self.broadcast_json()
 
     def export_score(self):
         short_results = self.count_short_results()
         try:
-            result = requests.post(url=os.path.join(os.getenv('EXPORT_RESULTS_URL'), "games/handle-results/panstwa-miasta"),
-                                   json=dict(roomId=self.id, results=short_results))
+            result = requests.post(
+                url=os.path.join(os.getenv('EXPORT_RESULTS_URL'), "games/handle-results/panstwa-miasta"),
+                json=dict(roomId=self.id, results=short_results))
             if result.status_code == 200:
                 print("export succesfull")
             else:
                 print("export failed: ", result.text, result.status_code)
                 print(short_results)
-        except (KeyError, requests.exceptions.MissingSchema):
+        except (KeyError, TypeError, requests.exceptions.MissingSchema):
             print("failed to get EXPORT_RESULT_URL env var")
             print(short_results)
 
@@ -175,27 +174,36 @@ class Room:
             print("failed to get EXPORT_RESULTS_URL env var")
             print("export failed players ids: ", self.get_players_in_game_ids())
 
-    def restart_timer(self):
+    def restart_timer(self, timeout):
         self.timer.cancel()
-        self.timer = threading.Timer(self.timeout, self.handle_timeout)
+        self.timer = threading.Timer(timeout, self.handle_timeout)
         self.timer.start()
-        self.timestamp = datetime.now() + timedelta(0, self.timeout)
+        self.timestamp = datetime.now() + timedelta(0, timeout)
 
     async def next_stage(self):
         if self.game.game_state is GameState.lobby:
             await self.start_game()
         elif self.game.game_state is GameState.completing:
-            self.game.summary_completing()  # przelicz to co dostałeś
+            self.game.summary_completing()
             self.game.game_state = GameState.voting
-            self.restart_timer()
+            self.restart_timer(self.timeout /2)
             await self.broadcast_json()
         elif self.game.game_state is GameState.voting:
             self.game.summary_voting()
             self.game.game_state = GameState.score_display
-            self.restart_timer()
+            self.restart_timer(self.timeout / 3)
             await self.broadcast_json()
         elif self.game.game_state is GameState.score_display:
             await self.restart_or_end_game()
 
     def count_short_results(self):
-        return self.game.get_short_results()
+        player_oriented_categories = self.game.categories.get_player_oriented_categories()
+        results = {}
+        for player_id in player_oriented_categories:
+            if player_id is not None:
+                player = self.get_player(player_id)
+                results[player.nick] = count_overall_score(player_oriented_categories[player_id])
+        return results
+
+    def get_player_nick(self, player_id):
+        pass
