@@ -12,8 +12,11 @@ def draw_letter() -> str:
     letters.replace("v", "").replace("x", "").replace("q", "")
     return random.choice(letters)
 
+
 def count_overall_score(categories) -> int:
     return sum([c.score for c in categories])
+
+
 class Categories:
     def __init__(self):
         self.categories: List[Category] = []

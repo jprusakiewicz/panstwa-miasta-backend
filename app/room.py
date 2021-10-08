@@ -14,9 +14,6 @@ from .game import Game, count_overall_score
 from .game_state import GameState
 
 
-
-
-
 class Room:
     def __init__(self, room_id: str, max_players: int = 8):
         self.full_results = []
@@ -128,10 +125,12 @@ class Room:
         if self.game.game_state == GameState.lobby:
             stats = {'game_state': self.game.game_state,
                      "number_of_players": self.number_of_players,
+                     'players_ids': [self.get_players_in_game_ids()],
                      "number_of_connected_players": len(self.active_connections)}
         else:
             stats = {'game_state': self.game.game_state,
                      "number_of_players": self.number_of_players,
+                     'players_ids': [self.get_players_in_game_ids()],
                      "number_of_connected_players": len(self.active_connections)}
         return stats
 
@@ -148,6 +147,7 @@ class Room:
 
     def export_score(self):
         short_results = self.count_short_results()
+        print('short results: ', short_results)
         try:
             result = requests.post(
                 url=os.path.join(os.getenv('EXPORT_RESULTS_URL'), "games/handle-results/panstwa-miasta"),
@@ -186,7 +186,7 @@ class Room:
         elif self.game.game_state is GameState.completing:
             self.game.summary_completing()
             self.game.game_state = GameState.voting
-            self.restart_timer(self.timeout /2)
+            self.restart_timer(self.timeout / 2)
             await self.broadcast_json()
         elif self.game.game_state is GameState.voting:
             self.game.summary_voting()

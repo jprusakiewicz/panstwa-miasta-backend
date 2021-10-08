@@ -25,7 +25,6 @@ class TestGame(unittest.TestCase):
         game.categories.append(c4)
         game.categories.append(c5)
 
-
         completing_summary = game.summary_completing()
         self.assertEqual(['a'], completing_summary['one'])
         self.assertIn('b', completing_summary['two'])
