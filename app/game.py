@@ -9,7 +9,7 @@ from app.game_state import GameState
 
 def draw_letter() -> str:
     letters = string.ascii_lowercase
-    letters.replace("v", "").replace("x", "").replace("q", "")
+    letters = letters.replace("v", "").replace("x", "").replace("q", "")
     return random.choice(letters)
 
 
