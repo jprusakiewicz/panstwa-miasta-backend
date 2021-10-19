@@ -36,7 +36,7 @@ class Categories:
             raise TypeError
 
     def get_categories_names(self) -> List[str]:
-        return [c.category_name for c in self.categories]
+        return list(set([c.category_name for c in self.categories]))
 
     def get_voting_candidates(self) -> dict:
         groups = defaultdict(list)

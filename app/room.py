@@ -1,11 +1,13 @@
 import asyncio
 import json
+import logging
 import os
 import random
 import threading
 import uuid
 from datetime import datetime, timedelta
 from typing import List
+from urllib.parse import urljoin
 
 import requests
 
@@ -147,19 +149,19 @@ class Room:
 
     def export_score(self):
         short_results = self.count_short_results()
-        print('short results: ', short_results)
-        try:
-            result = requests.post(
-                url=os.path.join(os.getenv('EXPORT_RESULTS_URL'), "games/handle-results/panstwa-miasta"),
-                json=dict(roomId=self.id, results=short_results))
-            if result.status_code == 200:
-                print("export succesfull")
-            else:
-                print("export failed: ", result.text, result.status_code)
-                print(short_results)
-        except (KeyError, TypeError, requests.exceptions.MissingSchema):
-            print("failed to get EXPORT_RESULT_URL env var")
-            print(short_results)
+        logging.log(30, f"short results: {short_results}")
+        # try:
+        result = requests.post(
+            url=urljoin(os.getenv('EXPORT_RESULTS_URL'), "games/handle-results/panstwa-miasta"),
+            json=dict(roomId=self.id, results=short_results))
+        if result.status_code == 200:
+            logging.log(30, "export succesfull")
+        else:
+            logging.log(30, "export failed: ", result.text, result.status_code)
+            logging.log(30, short_results)
+        # except (KeyError, TypeError, requests.exceptions.MissingSchema):
+        #     print("failed to get EXPORT_RESULT_URL env var")
+        #     print(short_results)
 
     def export_room_status(self):
         try:
