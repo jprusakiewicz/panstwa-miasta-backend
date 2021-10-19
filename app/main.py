@@ -178,10 +178,10 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
     except ConnectionClosedOK:
         await manager.kick_player(room_id, client_id)
         logging.info(f"ConnectionClosedOK {client_id}")
-    #
-    # except Exception as e:
-    #     logging.info(e)
-    #     logging.info("disconnected!")
+
+    except Exception as e:
+        logging.info(e)
+        logging.info("disconnected!")
 
 
 @app.websocket("/test/{room_id}/{client_id}/{nick}")
