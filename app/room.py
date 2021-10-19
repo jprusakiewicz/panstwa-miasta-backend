@@ -149,19 +149,19 @@ class Room:
 
     def export_score(self):
         short_results = self.count_short_results()
-        logging.log(30, f"short results: {short_results}")
-        # try:
-        result = requests.post(
-            url=urljoin(os.getenv('EXPORT_RESULTS_URL'), "games/handle-results/panstwa-miasta"),
-            json=dict(roomId=self.id, results=short_results))
-        if result.status_code == 200:
-            logging.log(30, "export succesfull")
-        else:
-            logging.log(30, "export failed: ", result.text, result.status_code)
+        logging.log(20, f"short results: {short_results}")
+        try:
+            result = requests.post(
+                url=urljoin(os.getenv('EXPORT_RESULTS_URL'), "games/handle-results/panstwa-miasta"),
+                json=dict(roomId=self.id, results=short_results))
+            if result.status_code == 200:
+                logging.log(20, "export succesfull")
+            else:
+                logging.log(30, "export failed: ", result.text, result.status_code)
+                logging.log(30, short_results)
+        except (KeyError, TypeError, requests.exceptions.MissingSchema):
+            logging.log(30, "failed to get EXPORT_RESULT_URL env var")
             logging.log(30, short_results)
-        # except (KeyError, TypeError, requests.exceptions.MissingSchema):
-        #     print("failed to get EXPORT_RESULT_URL env var")
-        #     print(short_results)
 
     def export_room_status(self):
         try:
@@ -169,12 +169,12 @@ class Room:
                 url=os.path.join(os.getenv('EXPORT_RESULTS_URL'), "rooms/update-room-status"),
                 json=dict(roomId=self.id, activePlayers=self.get_players_in_game_ids()))
             if result.status_code == 200:
-                print("export succesfull")
+                logging.log(20, "export succesfull")
             else:
-                print("export failed: ", result.text, result.status_code)
+                logging.log(30, f"export failed: {result.text}, {result.status_code}")
         except TypeError as e:
-            print("failed to get EXPORT_RESULTS_URL env var")
-            print("export failed players ids: ", self.get_players_in_game_ids())
+            logging.log(30, "failed to get EXPORT_RESULTS_URL env var")
+            logging.log(30, "export failed players ids: ", self.get_players_in_game_ids())
 
     def restart_timer(self, timeout):
         self.timer.cancel()
