@@ -9,7 +9,7 @@ from app.game_state import GameState
 
 def draw_letter() -> str:
     letters = string.ascii_lowercase
-    letters = letters.replace("v", "").replace("x", "").replace("q", "")
+    letters = letters.replace("v", "").replace("x", "").replace("q", "").replace("y", "")
     return random.choice(letters)
 
 
@@ -129,17 +129,17 @@ class Game:
         self.responses: dict = {}
         self.votes: dict = {}
 
-    def get_current_state(self) -> dict:
+    def get_current_state(self, player_nicks=None) -> dict:
         game_state = {}
         if self.game_state is GameState.lobby:
             pass
         elif self.game_state is GameState.completing:
-            game_state["categories"] = self.categories.get_categories_names()  # todo do it once!
+            game_state["categories"] = self.categories.get_categories_names()
             game_state["letter"] = self.letter
         elif self.game_state is GameState.voting:
-            game_state["candidates"] = self.get_voting_candidates()  # todo do it once!
+            game_state["candidates"] = self.get_voting_candidates()
         elif self.game_state is GameState.score_display:
-            game_state["results"] = self.get_result()  # todo do it once!
+            game_state["results"] = self.get_result(player_nicks)
         return game_state
 
     def summary_completing(self) -> dict:
@@ -172,7 +172,7 @@ class Game:
     def get_voting_candidates(self):
         return self.categories.get_voting_candidates()
 
-    def get_result(self) -> dict:
+    def get_result(self, player_nicks:dict) -> dict:
         player_oriented_categories = self.categories.get_player_oriented_categories()
         results = {}
         for player in player_oriented_categories:
@@ -182,7 +182,7 @@ class Game:
                 player_results.append({'category_name': category.category_name,
                                        'score': category.score,
                                        'word': category.word})
-            results[player] = {"results": player_results, "score": player_overall_score}
+            results[player_nicks[player]] = {"results": player_results, "score": player_overall_score}
         return results
 
     def handle_complete(self, player_id, player_move):

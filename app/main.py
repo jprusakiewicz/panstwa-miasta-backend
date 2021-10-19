@@ -8,7 +8,8 @@ from starlette.responses import JSONResponse
 from websockets.exceptions import ConnectionClosedOK
 
 from app.connection_manager import ConnectionManager
-from app.server_errors import GameIsStarted, PlayerIdAlreadyInUse, NoRoomWithThisId, RoomIdAlreadyInUse
+from app.server_errors import GameIsStarted, PlayerIdAlreadyInUse, NoRoomWithThisId, RoomIdAlreadyInUse, \
+    NoPlayerWithThisId
 
 app = FastAPI()
 
@@ -120,7 +121,13 @@ async def restart_game(room_id: str):
 
 @app.post("/game/kick_player/{room_id}/{player_id}")
 async def kick_player(room_id: str, player_id: str):
-    await manager.kick_player(room_id, player_id)
+    try:
+        await manager.kick_player(room_id, player_id)
+    except NoPlayerWithThisId:
+        return JSONResponse(
+            status_code=403,
+            content={"detail": f"No Player With This Id: {player_id}'"}
+        )
     return JSONResponse(
         status_code=200,
         content={"detail": "success"}
@@ -150,11 +157,11 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
             logging.info(e.__class__.__name__)
             logging.info(e)
 
-        except Exception as e:
-            logging.info(e)
-            logging.info(e.__class__.__name__)
-            logging.info("disconnected")
-            await manager.disconnect(websocket)
+        # except Exception as e:
+        #     logging.info(e)
+        #     logging.info(e.__class__.__name__)
+        #     logging.info("disconnected")
+        #     await manager.disconnect(websocket)
 
     except GameIsStarted:
         logging.info(f"Theres already game started")
@@ -181,7 +188,8 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
 async def websocket_endpoint(websocket: WebSocket):
     timestamp = datetime.now() + timedelta(0, 15)
     json_to_send = {'game_state': "COMPLETING",
-                    'game_data': {'categories': ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'], 'letter': 'a'},
+                    'game_data': {'categories': ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'],
+                                  'letter': 'a'},
                     "timestamp": timestamp.isoformat()}
     # json_to_send = {'game_state': "VOTING",
     #                 'game_data': {'candidates': {'first': ['aaa', 'bbb', 'ccc'], 'second': ['ddd', 'eee', 'fff'],

@@ -48,13 +48,13 @@ class ConnectionManager:
         connection_with_given_ws, room = self.get_active_connection(websocket)
         await room.remove_connection(connection_with_given_ws)
 
-    async def broadcast(self, room_id):
-        room = self.get_room(room_id)
-        for connection in room.active_connections:
-            try:
-                await connection.ws.send_text(room.get_game_state(connection.player.id))
-            except RuntimeError:
-                await self.kick_player(room_id, connection.player.id)
+    # async def broadcast(self, room_id):
+    #     room = self.get_room(room_id)
+    #     for connection in room.active_connections:
+    #         try:
+    #             await connection.ws.send_text(room.get_game_state(connection.player.id))
+    #         except RuntimeError:
+    #             await self.kick_player(room_id, connection.player.id)
 
     async def kick_player(self, room_id, player_id):
         room = self.get_room(room_id)

@@ -31,3 +31,8 @@ class GameIsStarted(WsServerError):
 class ItsNotYourTurn(WsServerError):
     def __init__(self):
         self.message = 'Its not your turn!'
+
+
+class NoPlayerWithThisId(WsServerError):
+    def __init__(self):
+        self.message = 'No Player With ThisId'

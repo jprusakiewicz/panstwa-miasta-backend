@@ -14,6 +14,7 @@ import requests
 from .connection import Connection
 from .game import Game, count_overall_score
 from .game_state import GameState
+from .server_errors import NoPlayerWithThisId
 
 
 class Room:
@@ -53,7 +54,6 @@ class Room:
     async def remove_connection(self, connection_with_given_ws):
         self.active_connections.remove(connection_with_given_ws)
         self.export_room_status()
-        print(len(self.get_players_in_game_ids()))
         if len(self.get_players_in_game_ids()) <= 1:
             await self.end_game()
             await self.broadcast_json()
@@ -110,7 +110,7 @@ class Room:
                               timestamp=self.get_timestamp(), game_data=self.game.get_current_state())
         elif self.game.game_state is GameState.score_display:
             game_state = dict(game_state=self.game.game_state.value, nicks=self.get_enemies_nicks(client_id),
-                              timestamp=self.get_timestamp(), game_data=self.game.get_current_state())
+                              timestamp=self.get_timestamp(), game_data=self.game.get_current_state(self.get_player_nicks()))
         else:
             raise ValueError
         return json.dumps(game_state)
@@ -137,8 +137,11 @@ class Room:
         return stats
 
     async def remove_player_by_id(self, id):
-        connection = next(
-            connection for connection in self.active_connections if connection.player.id == id)
+        try:
+            connection = next(
+                connection for connection in self.active_connections if connection.player.id == id)
+        except StopIteration:
+            raise NoPlayerWithThisId
         await self.remove_connection(connection)
 
     async def kick_player(self, player_id):  # probably have to leave this
@@ -172,7 +175,7 @@ class Room:
                 logging.log(20, "export succesfull")
             else:
                 logging.log(30, f"export failed: {result.text}, {result.status_code}")
-        except TypeError as e:
+        except (KeyError, TypeError, requests.exceptions.MissingSchema):
             logging.log(30, "failed to get EXPORT_RESULTS_URL env var")
             logging.log(30, "export failed players ids: ", self.get_players_in_game_ids())
 
@@ -207,5 +210,8 @@ class Room:
                 results[player.nick] = count_overall_score(player_oriented_categories[player_id])
         return results
 
-    def get_player_nick(self, player_id):
-        pass
+    def get_player_nicks(self):
+        player_nicks = {}
+        for connection in self.active_connections:
+            player_nicks[connection.player.id] = connection.player.nick
+        return player_nicks

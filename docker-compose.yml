@@ -5,6 +5,7 @@ services:
      context: ./
      dockerfile: ./Dockerfile
     environment:
+     TZ: "Europe/Warsaw"
      MAX_WORKERS: 1
      WEB_CONCURRENCY: 1
     ports:
