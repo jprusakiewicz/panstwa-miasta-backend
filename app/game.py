@@ -36,7 +36,8 @@ class Categories:
             raise TypeError
 
     def get_categories_names(self) -> List[str]:
-        return list(set([c.category_name for c in self.categories]))
+        seen = set()
+        return [c.category_name for c in self.categories if not (c.category_name in seen or seen.add(c.category_name))]
 
     def get_voting_candidates(self) -> dict:
         groups = defaultdict(list)
@@ -160,7 +161,7 @@ class Game:
 
     def setup_categories(self) -> Categories:
         if self.custom_categories is None:
-            custom_categories = ["Country", "City", "Plant", "Animal", "Name", "Item"]
+            custom_categories = ["Country", "City", "Item", "Animal", "Plant", "Name"]
         else:
             custom_categories = self.custom_categories
         categories = Categories()
@@ -172,7 +173,7 @@ class Game:
     def get_voting_candidates(self):
         return self.categories.get_voting_candidates()
 
-    def get_result(self, player_nicks:dict) -> dict:
+    def get_result(self, player_nicks: dict) -> dict:
         player_oriented_categories = self.categories.get_player_oriented_categories()
         results = {}
         for player in player_oriented_categories:
@@ -196,7 +197,6 @@ class Game:
             new_category.word = players_word
             new_category.player_id = player_id
             self.categories.append(new_category)
-        print(len(self.categories.categories))
 
     def handle_voting(self, player_id, first_player_voting):
         # todo check if player hasn't voted (dont let voting twice)

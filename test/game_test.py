@@ -34,7 +34,7 @@ class TestGame(unittest.TestCase):
     def test_getting_completing_state(self):
         expected_categories = ['first', 'second', 'third']
         game = Game()
-        game.categories = game.setup_categories(expected_categories)
+        game.categories = game.setup_categories()
         game.game_state = GameState.completing
         current_state = game.get_current_state()
         self.assertEqual(expected_categories, current_state["categories"])
