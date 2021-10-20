@@ -160,7 +160,7 @@ class Game:
 
     def setup_categories(self) -> Categories:
         if self.custom_categories is None:
-            custom_categories = ["Panstwo", "Miasto", "Roślina", "Zwierzę", "Imię", "Rzecz"]
+            custom_categories = ["Country", "City", "Plant", "Animal", "Name", "Item"]
         else:
             custom_categories = self.custom_categories
         categories = Categories()
