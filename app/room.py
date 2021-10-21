@@ -110,7 +110,8 @@ class Room:
                               timestamp=self.get_timestamp(), game_data=self.game.get_current_state())
         elif self.game.game_state is GameState.score_display:
             game_state = dict(game_state=self.game.game_state.value, nicks=self.get_enemies_nicks(client_id),
-                              timestamp=self.get_timestamp(), game_data=self.game.get_current_state(self.get_player_nicks()))
+                              timestamp=self.get_timestamp(),
+                              game_data=self.game.get_current_state(self.get_player_nicks()))
         else:
             raise ValueError
         return json.dumps(game_state)
@@ -203,11 +204,12 @@ class Room:
 
     def count_short_results(self):
         player_oriented_categories = self.game.categories.get_player_oriented_categories()
-        results = {}
+        results = []
         for player_id in player_oriented_categories:
             if player_id is not None:
                 player = self.get_player(player_id)
-                results[player.nick] = count_overall_score(player_oriented_categories[player_id])
+                results.append(
+                    {"playerId": player.id, "score": count_overall_score(player_oriented_categories[player_id])})
         return results
 
     def get_player_nicks(self):
