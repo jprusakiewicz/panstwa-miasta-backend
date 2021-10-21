@@ -25,7 +25,7 @@ class Room:
         self.game: Game = Game()
         self.number_of_players = max_players
         self.game_id: str
-        self.timeout = 59
+        self.timeout = 69
         self.timer = threading.Timer(self.timeout, self.handle_timeout)
 
     def handle_timeout(self):
@@ -196,7 +196,7 @@ class Room:
         elif self.game.game_state is GameState.voting:
             self.game.summary_voting()
             self.game.game_state = GameState.score_display
-            self.restart_timer(self.timeout / 3)
+            self.restart_timer((self.timeout / 3) - 10)
             await self.broadcast_json()
         elif self.game.game_state is GameState.score_display:
             await self.restart_or_end_game()
