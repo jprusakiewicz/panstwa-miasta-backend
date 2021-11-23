@@ -126,6 +126,7 @@ class Game:
         self.custom_categories = custom_categories
         self.game_state: GameState = GameState.lobby
         self.letter: str = draw_letter()
+        self.temporary_categories = {}
         self.categories: Categories = self.setup_categories()
         self.responses: dict = {}
         self.votes: dict = {}
@@ -222,3 +223,8 @@ class Game:
                                 category.legit_score += 1
                             if voting is False:
                                 category.legit_score -= 1
+
+    def build_full_categories(self):
+        for client_id in self.temporary_categories:
+            self.handle_complete(client_id, self.temporary_categories[client_id])  # todo cut this line
+

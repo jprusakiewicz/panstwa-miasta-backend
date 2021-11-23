@@ -77,6 +77,7 @@ class Room:
     async def end_game(self):
         self.timer.cancel()
         self.export_score()
+
         self.game = Game()
         await self.broadcast_json()
 
@@ -91,7 +92,7 @@ class Room:
         if self.game.game_state is GameState.lobby or self.game.game_state is GameState.score_display:
             pass  # do nothing
         elif self.game.game_state is GameState.completing:
-            self.game.handle_complete(client_id, player_move)
+            self.game.temporary_categories[client_id] = player_move
         elif self.game.game_state is GameState.voting:
             self.game.votes[client_id] = player_move
 
@@ -178,7 +179,7 @@ class Room:
                 logging.log(30, f"export failed: {result.text}, {result.status_code}")
         except (KeyError, TypeError, requests.exceptions.MissingSchema):
             logging.log(30, "failed to get EXPORT_RESULTS_URL env var")
-            logging.log(30, "export failed players ids: ", self.get_players_in_game_ids())
+            logging.log(30, f"export failed players ids: {self.get_players_in_game_ids()}")
 
     def restart_timer(self, timeout):
         self.timer.cancel()
@@ -190,6 +191,7 @@ class Room:
         if self.game.game_state is GameState.lobby:
             await self.start_game()
         elif self.game.game_state is GameState.completing:
+            self.game.build_full_categories()
             self.game.summary_completing()
             self.game.game_state = GameState.voting
             self.restart_timer(self.timeout / 2)
@@ -207,9 +209,12 @@ class Room:
         results = []
         for player_id in player_oriented_categories:
             if player_id is not None:
-                player = self.get_player(player_id)
-                results.append(
-                    {"playerId": player.id, "score": count_overall_score(player_oriented_categories[player_id])})
+                try:
+                    player = self.get_player(player_id)
+                    results.append(
+                        {"playerId": player.id, "score": count_overall_score(player_oriented_categories[player_id])})
+                except StopIteration:
+                    pass
         return results
 
     def get_player_nicks(self):
