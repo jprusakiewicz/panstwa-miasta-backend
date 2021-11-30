@@ -1,4 +1,5 @@
 import json
+import logging
 
 from starlette.websockets import WebSocket
 
@@ -60,11 +61,11 @@ class ConnectionManager:
         room = self.get_room(room_id)
         await room.kick_player(player_id)
 
-    async def handle_ws_message(self, message, room_id, client_id):
+    async def handle_ws_message(self, text_message, room_id, client_id):
         try:
-            players_move = json.loads(message["text"])
             room = self.get_room(room_id)
-            room.handle_players_move(client_id, players_move)
+            json_message = json.loads(text_message)
+            room.handle_players_move(client_id, json_message)
         except KeyError:
             print("handle message")
             pass
@@ -91,6 +92,7 @@ class ConnectionManager:
                 'rooms_ids': [r.id for r in self.rooms]}
 
     async def create_new_room(self, room_id):
+        logging.log(20, "NEW ROOM")
         if room_id not in [room.id for room in self.rooms]:
             self.rooms.append(Room(room_id=room_id))
         else:

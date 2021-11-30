@@ -3,13 +3,12 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 import uvicorn
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from starlette.responses import JSONResponse
-from websockets.exceptions import ConnectionClosedOK
 
 from app.connection_manager import ConnectionManager
-from app.server_errors import GameIsStarted, PlayerIdAlreadyInUse, NoRoomWithThisId, RoomIdAlreadyInUse, \
-    NoPlayerWithThisId
+from app.server_errors import NoRoomWithThisId, RoomIdAlreadyInUse, \
+    NoPlayerWithThisId, GameIsStarted, PlayerIdAlreadyInUse
 
 app = FastAPI()
 
@@ -36,7 +35,6 @@ async def get_stats(room_id: Optional[str] = None):
 
 @app.post("/room/new/{room_id}")
 async def new_room(room_id: str):
-    number_players: int = 4
     try:
         await manager.create_new_room(room_id)
         return JSONResponse(
@@ -142,23 +140,11 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
 
         try:
             while True:
-                message = await websocket.receive()
-                logging.info(message)
-                try:
-                    if message['code'] == 1006 or message['code'] == 1001:
-                        print(1001)
-                        await manager.disconnect(websocket)
-                except KeyError:
-                    await manager.handle_ws_message(message, room_id, client_id)
-                else:
-                    await manager.handle_ws_message(message, room_id, client_id)
-
-        except RuntimeError:
-            try:
-                if message['code'] == 1006 or message['code'] == 1001:  # 'websocket.disconnect'
-                    await manager.disconnect(websocket)
-            except Exception:
-                pass
+                text_message = await websocket.receive_text()
+                await manager.handle_ws_message(text_message, room_id, client_id)
+        except WebSocketDisconnect:
+            await manager.kick_player(room_id, client_id)
+            logging.info(f"ConnectionClosedOK {client_id}")
 
         except Exception as e:
             logging.info(e)
@@ -177,10 +163,6 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
     except NoRoomWithThisId:
         logging.info(f"Theres no room with this id: {room_id}")
         await websocket.close()
-
-    except ConnectionClosedOK:
-        await manager.kick_player(room_id, client_id)
-        logging.info(f"ConnectionClosedOK {client_id}")
 
     except Exception as e:
         logging.info(e)

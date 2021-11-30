@@ -187,7 +187,7 @@ class Game:
             results[player_nicks[player]] = {"results": player_results, "score": player_overall_score}
         return results
 
-    def handle_complete(self, player_id, player_move):
+    def handle_complete(self, player_id, player_move: dict):
         for category in player_move:
             new_category = Category(category)
             players_word: str = player_move[category].strip('\u200b').lower()
