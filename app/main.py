@@ -84,10 +84,17 @@ async def end_game(room_id: str):
 @app.post("/game/end/{room_id}")
 async def end_game(room_id: str):
     await manager.end_game(room_id)
-    return JSONResponse(
-        status_code=200,
-        content={"detail": "success"}
-    )
+    try:
+        return JSONResponse(
+            status_code=200,
+            content={"detail": "success"}
+        )
+    except NoRoomWithThisId:
+        logging.info(f"Theres no room with this id: {room_id}")
+        return JSONResponse(
+            status_code=403,
+            content={"detail": f"Theres no room with this id: {room_id}"}
+        )
 
 
 @app.post("/game/end_all_games")
@@ -101,20 +108,34 @@ async def end_game():
 
 @app.post("/game/start/{room_id}")
 async def start_game(room_id: str):
-    await manager.start_game(room_id)
-    return JSONResponse(
-        status_code=200,
-        content={"detail": "success"}
-    )
+    try:
+        await manager.start_game(room_id)
+        return JSONResponse(
+            status_code=200,
+            content={"detail": "success"}
+        )
+    except NoRoomWithThisId:
+        logging.info(f"Theres no room with this id: {room_id}")
+        return JSONResponse(
+            status_code=403,
+            content={"detail": f"Theres no room with this id: {room_id}"}
+        )
 
 
 @app.post("/game/restart/{room_id}")
 async def restart_game(room_id: str):
-    await manager.restart_game(room_id)
-    return JSONResponse(
-        status_code=200,
-        content={"detail": "success"}
-    )
+    try:
+        await manager.restart_game(room_id)
+        return JSONResponse(
+            status_code=200,
+            content={"detail": "success"}
+        )
+    except NoRoomWithThisId:
+        logging.info(f"Theres no room with this id: {room_id}")
+        return JSONResponse(
+            status_code=403,
+            content={"detail": f"Theres no room with this id: {room_id}"}
+        )
 
 
 @app.post("/game/kick_player/{room_id}/{player_id}")
@@ -125,6 +146,12 @@ async def kick_player(room_id: str, player_id: str):
         return JSONResponse(
             status_code=403,
             content={"detail": f"No Player With This Id: {player_id}'"}
+        )
+    except NoRoomWithThisId:
+        logging.info(f"Theres no room with this id: {room_id}")
+        return JSONResponse(
+            status_code=403,
+            content={"detail": f"Theres no room with this id: {room_id}"}
         )
     return JSONResponse(
         status_code=200,

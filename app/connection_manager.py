@@ -92,7 +92,6 @@ class ConnectionManager:
                 'rooms_ids': [r.id for r in self.rooms]}
 
     async def create_new_room(self, room_id):
-        logging.log(20, "NEW ROOM")
         if room_id not in [room.id for room in self.rooms]:
             self.rooms.append(Room(room_id=room_id))
         else:

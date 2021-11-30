@@ -75,9 +75,11 @@ class Room:
         await self.broadcast_json()
 
     async def end_game(self):
-        self.timer.cancel()
+        try:
+            self.timer.cancel()
+        except Exception:
+            pass
         self.export_score()
-
         self.game = Game()
         await self.broadcast_json()
 
@@ -164,7 +166,7 @@ class Room:
             else:
                 logging.log(30, "export failed: ", result.text, result.status_code)
                 logging.log(30, short_results)
-        except (KeyError, TypeError, requests.exceptions.MissingSchema):
+        except Exception:
             logging.log(30, "failed to get EXPORT_RESULT_URL env var")
             logging.log(30, short_results)
 
@@ -177,7 +179,7 @@ class Room:
                 logging.log(20, "export succesfull")
             else:
                 logging.log(30, f"export failed: {result.text}, {result.status_code}")
-        except (KeyError, TypeError, requests.exceptions.MissingSchema):
+        except Exception:
             logging.log(30, "failed to get EXPORT_RESULTS_URL env var")
             logging.log(30, f"export failed players ids: {self.get_players_in_game_ids()}")
 
