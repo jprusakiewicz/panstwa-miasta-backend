@@ -174,9 +174,9 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
             logging.info(f"ConnectionClosedOK {client_id}")
 
         except Exception as e:
-            logging.info(e)
-            logging.info(e.__class__.__name__)
-            logging.info("disconnected")
+            logging.log(40, e)
+            logging.log(40, e.__class__.__name__)
+            logging.log(40, "disconnected")
             await manager.disconnect(websocket)
 
     except GameIsStarted:
@@ -192,8 +192,8 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str,
         await websocket.close()
 
     except Exception as e:
-        logging.info(e)
-        logging.info("disconnected!")
+        logging.log(40, e)
+        logging.log(40, "disconnected!")
 
 
 @app.websocket("/test/{room_id}/{client_id}/{nick}")
