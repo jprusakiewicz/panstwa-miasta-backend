@@ -6,7 +6,7 @@ from starlette.websockets import WebSocket
 from app.connection import Connection
 from app.player import Player
 from app.room import Room
-from app.server_errors import PlayerIdAlreadyInUse, NoRoomWithThisId, RoomIdAlreadyInUse, ItsNotYourTurn
+from app.server_errors import PlayerIdAlreadyInUse, NoRoomWithThisId, RoomIdAlreadyInUse
 
 
 class ConnectionManager:
@@ -69,8 +69,6 @@ class ConnectionManager:
         except KeyError:
             print("handle message")
             pass
-        except ItsNotYourTurn as e:
-            print(e)
 
     def get_active_connection(self, websocket: WebSocket):
         for r in self.rooms:

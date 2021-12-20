@@ -89,14 +89,17 @@ class Room:
         else:
             await self.end_game()
 
-    def handle_players_move(self, client_id, player_move):
-        print(player_move, " ", self.game.game_state)
+    def handle_players_move(self, client_id:str, player_move: dict):
+        players_game_state = player_move['gameState']
+        players_results = player_move['results']
+
+        print(players_results, " ", self.game.game_state)
         if self.game.game_state is GameState.lobby or self.game.game_state is GameState.score_display:
             pass  # do nothing
-        elif self.game.game_state is GameState.completing:
-            self.game.temporary_categories[client_id] = player_move
-        elif self.game.game_state is GameState.voting:
-            self.game.votes[client_id] = player_move
+        elif self.game.game_state is GameState.completing and players_game_state == "COMPLETING":
+            self.game.temporary_categories[client_id] = players_results
+        elif self.game.game_state is GameState.voting and players_game_state == "VOTING":
+            self.game.votes[client_id] = players_results
 
     def get_timestamp(self, delta=2):
         t = self.timestamp - timedelta(0, delta)

@@ -154,6 +154,7 @@ class Game:
 
     def summary_voting(self):
         self.categories.filter_empty()
+        print("summary voting", self.categories)
         self.count_votes()
         self.categories.fill_is_unique()
         self.categories.fill_is_legit(self.letter)
@@ -199,32 +200,23 @@ class Game:
             new_category.player_id = player_id
             self.categories.append(new_category)
 
-    def handle_voting(self, player_id, first_player_voting):
-        # todo check if player hasn't voted (dont let voting twice)
-        for category in first_player_voting:
-            for word in first_player_voting[category]:
-                items = [c for c in self.categories.categories if
-                         c.category_name == category and c.word == word]
-                for item in items:
-                    if first_player_voting[category][word] is True:
-                        item.legit_score += 1
-                    elif first_player_voting[category][word] is False:
-                        item.legit_score -= 1
-        # todo player.has_voted = True
-
     def count_votes(self):
         for player in self.votes:
             for p_category in self.votes[player]:
                 for word in self.votes[player][p_category]:
-                    voting = self.votes[player][p_category][word]
-                    for category in self.categories.categories:
-                        if category.word == word and category.category_name == p_category:
-                            if voting is True:
-                                category.legit_score += 1
-                            if voting is False:
-                                category.legit_score -= 1
+                    try:
+                        voting = self.votes[player][p_category][word]  # TypeError
+                        for category in self.categories.categories:
+                            if category.word == word and category.category_name == p_category:
+                                if voting is True:
+                                    category.legit_score += 1
+                                    print(word, "is legit")
+                                if voting is False:
+                                    category.legit_score -= 1
+                                    print(word, "is not legit")
+                    except (TypeError, KeyError):
+                        pass
 
     def build_full_categories(self):
         for client_id in self.temporary_categories:
             self.handle_complete(client_id, self.temporary_categories[client_id])  # todo cut this line
-
