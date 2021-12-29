@@ -185,7 +185,10 @@ class Game:
                 player_results.append({'category_name': category.category_name,
                                        'score': category.score,
                                        'word': category.word})
-            results[player_nicks[player]] = {"results": player_results, "score": player_overall_score}
+            try:
+                results[player_nicks[player]] = {"results": player_results, "score": player_overall_score}
+            except KeyError:
+                pass
         return results
 
     def handle_complete(self, player_id, player_move: dict):
