@@ -1,6 +1,6 @@
 import unittest
 
-from app.game import Category, Game, draw_letter
+from app.game import Category, Game
 from app.game_state import GameState
 
 
@@ -360,14 +360,15 @@ class TestGame(unittest.TestCase):
         current_game_state = game.get_current_state()
         self.assertEqual(expected_results, current_game_state["results"])
 
-
     def test_getting_letter(self):
+        g = Game()
+        last_letter = ''
         for _ in range(10000):
-            letter = draw_letter()
-            if letter == 'q' or letter == 'x':
-                self.assertNotEqual(letter, 'q')
-                self.assertNotEqual(letter, 'x')
-
+            letter = g.draw_letter()
+            self.assertNotEqual(letter, 'q')
+            self.assertNotEqual(letter, 'x')
+            self.assertNotEqual(letter, last_letter)
+            last_letter = letter
 
 
 if __name__ == '__main__':

@@ -7,12 +7,6 @@ from typing import List, Optional
 from app.game_state import GameState
 
 
-def draw_letter() -> str:
-    letters = string.ascii_lowercase
-    letters = letters.replace("v", "").replace("x", "").replace("q", "").replace("y", "")
-    return random.choice(letters)
-
-
 def count_overall_score(categories) -> int:
     return sum([c.score for c in categories])
 
@@ -121,11 +115,19 @@ def count_overall_legit_score(categories) -> int:
     return sum([c.legit_score for c in categories])
 
 
+def setup_letters():
+    letters = string.ascii_lowercase
+    letters = letters.replace("v", "").replace("x", "").replace("q", "").replace("y", "")
+    return letters
+
+
 class Game:
     def __init__(self, custom_categories=None):
+        self.letters = setup_letters()
+        self.last_letter = None
         self.custom_categories = custom_categories
         self.game_state: GameState = GameState.lobby
-        self.letter: str = draw_letter()
+        self.letter: str = self.draw_letter()
         self.temporary_categories = {}
         self.categories: Categories = self.setup_categories()
         self.responses: dict = {}
@@ -223,3 +225,10 @@ class Game:
     def build_full_categories(self):
         for client_id in self.temporary_categories:
             self.handle_complete(client_id, self.temporary_categories[client_id])  # todo cut this line
+
+    def draw_letter(self) -> str:
+        drawn_letter = random.choice(self.letters)
+        while drawn_letter == self.last_letter:
+            drawn_letter = random.choice(self.letters)
+        self.last_letter = drawn_letter
+        return drawn_letter
