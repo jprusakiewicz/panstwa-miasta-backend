@@ -196,7 +196,7 @@ class Game:
     def handle_complete(self, player_id, player_move: dict):
         for category in player_move:
             new_category = Category(category)
-            players_word: str = player_move[category].strip('\u200b').lower()
+            players_word: str = player_move[category].strip(' ').strip('\u200b').strip(' ').lower()
             try:
                 new_category.word = players_word if players_word[0] == self.letter else ""
             except IndexError:
